@@ -7,6 +7,7 @@ namespace APBD_10.Entities
     {
         public int IdStudy { get; set; }
         public string Name { get; set; }
+        public virtual ICollection<Enrollment> Enrollment { get; set; }
 
     }
 }

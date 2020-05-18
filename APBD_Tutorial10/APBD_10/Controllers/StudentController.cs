@@ -23,14 +23,17 @@ namespace APBD_10.Controllers
         [HttpGet]
         public IActionResult GetStudent()
         {
+            
             var students = _studentContext.Student
+                                          .Include(s => s.IdEnrollmentNavigation).ThenInclude(e => e.IdStudyNavigation)
                                            .Select(s => new GetStudentsResponse
                                            {
                                                IndexNumber = s.StudentId,
                                                FirstName = s.FirstName,
                                                LastName = s.LastName,
                                                BirthDate = s.BirthDate,
-
+                                               Semester = s.IdEnrollmentNavigation.Semester,
+                                               Studies = s.IdEnrollmentNavigation.IdStudyNavigation.Name
 
                                            }).ToList();
             return Ok(students);
@@ -80,6 +83,11 @@ namespace APBD_10.Controllers
         [HttpPost("Enroll")]
         public IActionResult EnrollNewStudent(EnrollStudentRequest studentRequest)
         {
+            if(studentRequest.IndexNumber == null || studentRequest.FirstName == null || studentRequest.LastName == null
+                || studentRequest.StudyName == null||studentRequest.BirthDate == null)
+            {
+                return NotFound("info is missing");
+            }
             var enrollmentId = -1;
             var res = (from study in _studentContext.Studies
                       where study.Name.Equals(studentRequest.StudyName)
@@ -116,6 +124,11 @@ namespace APBD_10.Controllers
         [HttpPost("Promote")]
         public IActionResult PromoteStudent(PromoteStudentRequest promoteStudentRequest)
         {
+            if (promoteStudentRequest.StudyName == null || promoteStudentRequest.Semester == null || 
+                promoteStudentRequest.IdEnrollment == null)
+            {
+                return NotFound("info is missing");
+            }
             var newSemester = promoteStudentRequest.Semester + 1;
             var newEnrollId = _studentContext.Enrollment.Max(x => x.IdEnrollment) + 1;
             

@@ -37,6 +37,12 @@ namespace APBD_10.Entities
                 entity.Property(e => e.IdEnrollment).ValueGeneratedNever();
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.HasOne(d => d.IdStudyNavigation)
+                   .WithMany(p => p.Enrollment)
+                   .HasForeignKey(d => d.IdStudy)
+                   .OnDelete(DeleteBehavior.ClientSetNull)
+                   .HasConstraintName("Enrollment_Studies");
             });
 
             modelBuilder.Entity<Student>(entity =>
@@ -56,6 +62,11 @@ namespace APBD_10.Entities
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
+                entity.HasOne(d => d.IdEnrollmentNavigation)
+                    .WithMany(p => p.Student)
+                    .HasForeignKey(d => d.IdEnrollment)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Student_Enrollment");
             });
 
             modelBuilder.Entity<Studies>(entity =>
